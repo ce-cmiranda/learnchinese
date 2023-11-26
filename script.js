@@ -1,46 +1,47 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const storyContainer = document.getElementById('storyContainer');
-    const togglePinyinButton = document.getElementById('togglePinyin');
+document.addEventListener('DOMContentLoaded', () => {
+    const hskLevelSelect = document.getElementById('hsk-level');
+    const generateStoryBtn = document.getElementById('generate-story');
+    const togglePinyinBtn = document.getElementById('toggle-pinyin');
+    const storyContainer = document.getElementById('story-container');
     const tooltip = document.getElementById('tooltip');
 
-    // Function to create a word container
-    function createWordContainer(word, pinyin, translation) {
-        const wordContainer = document.createElement('div');
-        wordContainer.className = 'word-container hsk2';
-
-        wordContainer.innerHTML = `
-            <span class="pinyin">${pinyin}</span>
-            <span class="word" data-translation="${translation}">${word}</span>
-        `;
-
-        // Add event listeners for tooltips
-        wordContainer.addEventListener('mouseover', function(event) {
-            tooltip.innerHTML = translation;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (event.clientX - tooltip.offsetWidth / 2) + 'px';
-            tooltip.style.top = (event.clientY - tooltip.offsetHeight - 20) + 'px';
-        });
-
-        wordContainer.addEventListener('mouseout', function() {
-            tooltip.style.display = 'none';
-        });
-
-        return wordContainer;
-    }
-
-    // Split the story into words and process each word
-    const words = text.split(' ');
-    words.forEach(word => {
-        const trimmedWord = word.trim();
-        if (trimmedWord.length > 0 && translationDatabase[trimmedWord]) {
-            const { pinyin, translation } = translationDatabase[trimmedWord];
-            const wordContainer = createWordContainer(trimmedWord, pinyin, translation);
-            storyContainer.appendChild(wordContainer);
+    generateStoryBtn.addEventListener('click', () => {
+        const selectedLevel = hskLevelSelect.value;
+        if (selectedLevel && hskStories[selectedLevel]) {
+            const randomStory = hskStories[selectedLevel][Math.floor(Math.random() * hskStories[selectedLevel].length)];
+            displayStory(randomStory);
+        } else {
+            storyContainer.textContent = 'Please select an HSK level.';
         }
     });
 
-    // Toggle Pinyin display
-    togglePinyinButton.addEventListener('click', function() {
+    togglePinyinBtn.addEventListener('click', () => {
         storyContainer.classList.toggle('show-pinyin');
     });
+
+    function displayStory(story) {
+        storyContainer.innerHTML = '';
+        const words = story.split(' ');
+        words.forEach(word => {
+            const wordData = translationDatabase[word.trim()];
+            if (wordData) {
+                const wordDiv = document.createElement('div');
+                wordDiv.className = 'word-container';
+                wordDiv.innerHTML = `
+                    <span class="chinese">${word}</span>
+                    <span class="pinyin">${wordData.pinyin}</span>
+                `;
+                wordDiv.addEventListener('mouseover', function(event) {
+                    tooltip.textContent = wordData.translation;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${event.clientX}px`;
+                    tooltip.style.top = `${event.clientY - 40}px`;
+                });
+                wordDiv.addEventListener('mouseout', function() {
+                    tooltip.style.display = 'none';
+                });
+                storyContainer.appendChild(wordDiv);
+            }
+        });
+    }
 });
