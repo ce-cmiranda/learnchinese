@@ -30,6 +30,42 @@
             <p>Your donations help us develop more content and improve our platform. Thank you for your support!</p>
             <button id="donate-button">Donate Now</button>
         </div>
+
+        <!-- Audit Button and Results Display -->
+        <button id="audit-button">Run Audit</button>
+        <div id="audit-results"></div>
     </div>
+
+    <script>
+        document.getElementById('audit-button').addEventListener('click', function() {
+            const auditResults = auditStoriesAgainstDatabase(hskStories, translationDatabase);
+            const resultsContainer = document.getElementById('audit-results');
+            resultsContainer.innerHTML = '';
+
+            if (auditResults.length > 0) {
+                resultsContainer.innerHTML = '<p>Missing words:</p><ul>' + 
+                    auditResults.map(word => `<li>${word}</li>`).join('') + '</ul>';
+            } else {
+                resultsContainer.innerHTML = '<p>All words are present in the translation database.</p>';
+            }
+        });
+
+        function auditStoriesAgainstDatabase(stories, database) {
+            const missingWords = [];
+
+            Object.values(stories).forEach(levelStories => {
+                levelStories.forEach(story => {
+                    const words = story.split(/\s+/);
+                    words.forEach(word => {
+                        if (!database[word] && word.trim() !== "") {
+                            missingWords.push(word);
+                        }
+                    });
+                });
+            });
+
+            return missingWords;
+        }
+    </script>
 </body>
 </html>
